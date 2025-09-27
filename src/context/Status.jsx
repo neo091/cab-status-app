@@ -3,10 +3,6 @@ import { createContext, useContext, useEffect, useState } from "react"
 const StatusContext = createContext()
 
 export const StatusProvider = ({ children }) => {
-  const apiUri =
-    import.meta.env.VITE_API_URI_LOCAL ||
-    "https://cabstatus-backend-v2.vercel.app"
-
   const [status, setStatus] = useState(null)
 
   const freeStatus = () => {

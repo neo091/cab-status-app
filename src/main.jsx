@@ -5,15 +5,18 @@ import App from "./App.jsx"
 import { AbreviatedProvider } from "./context/abreviated.jsx"
 import { StatusProvider } from "./context/Status.jsx"
 import { ConfigProvider } from "./context/Config.jsx"
+import { SessionProvider } from "./context/Session.context.jsx"
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <StatusProvider>
-      <ConfigProvider>
-        <AbreviatedProvider>
-          <App />
-        </AbreviatedProvider>
-      </ConfigProvider>
-    </StatusProvider>
+    <SessionProvider>
+      <StatusProvider>
+        <ConfigProvider>
+          <AbreviatedProvider>
+            <App />
+          </AbreviatedProvider>
+        </ConfigProvider>
+      </StatusProvider>
+    </SessionProvider>
   </StrictMode>
 )

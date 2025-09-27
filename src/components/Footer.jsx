@@ -18,9 +18,6 @@ const Footer = ({ descansar }) => {
       >
         Descansar
       </button>
-      <Link to={"/admin/dashboard"} className="  px-6 py-2 bg-gray-950 rounded">
-        Admin
-      </Link>
       <button
         className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
         onClick={toggleAbreviated}
