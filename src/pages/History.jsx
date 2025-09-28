@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 import Swal from "sweetalert2"
 import { deleteTrip, getTrips } from "../services/trip.service"
 import { useSessionContext } from "../context/Session.context"
-import { IconsTrash } from "../assets/Icons"
+import { IconChevronLeft, IconsTrash } from "../assets/Icons"
 const History = () => {
   const [historyList, setHistoryList] = useState([])
   const [pagination, setPagination] = useState(null)
@@ -71,7 +71,7 @@ const History = () => {
   return (
     <>
       <main className="bg-gray-900 min-h-dvh flex flex-col">
-        <Header />
+        <Header backspace />
         <section className="bg-gray-800 flex-1 flex flex-col items-center justify-center">
           {historyList.length === 0 ? (
             <div className="text-center text-gray-400 py-6">
@@ -125,13 +125,6 @@ const History = () => {
               </button>
             </div>
           )}
-
-          <Link
-            to={"/"}
-            className="p-2 text-center font-bold text-2xl text-white"
-          >
-            Volver
-          </Link>
         </section>
         <Footer />
       </main>

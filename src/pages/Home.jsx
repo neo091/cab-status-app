@@ -9,6 +9,7 @@ import { Login } from "../components/Login"
 import { useConfigContext } from "../context/Config"
 import { updateStatus } from "../services/status"
 import { addTrip } from "../services/trip.service"
+import { IconDelete } from "../assets/Icons"
 
 const Home = () => {
   const { status, busyStatus, freeStatus, restStatus } = useStatusContext()
@@ -106,14 +107,20 @@ const Home = () => {
 
     const data = {
       duration: duration,
-      amount: monto,
+      amount: parseFloat(monto),
       payMethod: metodoPago === "efectivo" ? "CASH" : "CARD",
     }
 
     await addTrip({ data, token })
   }
 
+  const noAmount = () => {
+    return
+  }
+
   const guardarPagoWhatsApp = () => {
+    if (monto.length === 0) return
+
     const mensaje = abreviated
       ? `${monto}${metodoPago == "tarjeta" ? "t" : "e"}`
       : `✅ ${monto} € - ${metodoPago}`
@@ -143,10 +150,13 @@ const Home = () => {
     setMonto("")
     setMetodoPago("efectivo")
   }
-  const setAmountHandle = (e) => {
-    const text = e.target.innerText
-
-    setMonto(monto + e.target.innerText)
+  const setAmountHandle = (e) => setMonto(monto + e.target.innerText)
+  const deleteAmount = () => {
+    if (monto.length !== 0) {
+      const newTexto = monto.slice(0, monto.length - 1)
+      setMonto(newTexto)
+      console.log(newTexto)
+    }
   }
 
   const descansar = async () => {
@@ -198,8 +208,8 @@ const Home = () => {
                 Finalizar viaje
               </h3>
 
-              <div>
-                <p>{monto}</p>
+              <div className="w-full bg-gray-900 h-10 text-white flex items-center justify-center">
+                <p className="text-white font-bold font-mono">{monto}</p>
               </div>
 
               <div className="flex gap-2 mt-5 mb-5">
@@ -292,7 +302,12 @@ const Home = () => {
                 >
                   .
                 </button>
-                <button className="bg-gray-700 text-white p-3 font-bold rounded-full"></button>
+                <button
+                  onClick={deleteAmount}
+                  className="bg-gray-700 text-white p-3 font-bold rounded-full text-center flex items-center justify-center"
+                >
+                  <IconDelete />
+                </button>
               </div>
 
               <div className="flex gap-2 justify-between">

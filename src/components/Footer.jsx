@@ -14,7 +14,7 @@ const Footer = ({ descansar }) => {
       </Link>
       <button
         onClick={descansar}
-        className="font-bold px-6 py-2 bg-gray-950 rounded cursor-pointer"
+        className="px-6 py-2 bg-gray-950 rounded cursor-pointer"
       >
         Descansar
       </button>
