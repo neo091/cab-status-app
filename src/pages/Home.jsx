@@ -114,10 +114,6 @@ const Home = () => {
     await addTrip({ data, token })
   }
 
-  const noAmount = () => {
-    return
-  }
-
   const guardarPagoWhatsApp = () => {
     if (monto.length === 0) return
 
