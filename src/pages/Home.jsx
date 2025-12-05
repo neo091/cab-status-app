@@ -31,18 +31,19 @@ const Home = () => {
 
   // 🔹 Función para calcular la duración
   const getDuration = () => {
-    if (!startTime) return "0:00"
+    if (!startTime) return "00:00:00"
 
     const from = new Date(startTime)
     const to = new Date()
 
-    const duracion = Math.floor((to - from) / 1000)
-    const minutos = Math.floor(duracion / 60)
+    const duracion = Math.floor((to - from) / 1000) // total en segundos
+    const horas = Math.floor(duracion / 3600)
+    const minutos = Math.floor((duracion % 3600) / 60)
     const segundos = duracion % 60
 
-    return `${minutos.toString().padStart(2, "0")}:${segundos
+    return `${horas.toString().padStart(2, "0")}:${minutos
       .toString()
-      .padStart(2, "0")}`
+      .padStart(2, "0")}:${segundos.toString().padStart(2, "0")}`
   }
 
   // 🔹 Inicia el contador y guarda el inicio en localStorage
@@ -182,13 +183,26 @@ const Home = () => {
     return () => clearInterval(interval)
   }, [startTime])
 
-  if (loading) return
+  if (loading)
+    return (
+      <div className="w-full h-full min-h-svh min-w-full flex items-center justify-center bg-gray-900 text-white">
+        <img
+          src="cabstatusIcon.png"
+          className="animate-bounce w-[64px]"
+          alt="cab status icon"
+        />
+      </div>
+    )
 
   if (!user) return <Login />
 
   return (
     <>
-      <main className="bg-gray-900 min-h-dvh flex flex-col">
+      <main
+        className={`bg-gray-900 min-h-dvh flex flex-col ${
+          user ? " fade-in " : ""
+        }`}
+      >
         <Header timer={displayTime} />
 
         <section className="bg-gray-800 flex-1 flex items-center justify-center">

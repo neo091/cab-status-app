@@ -32,9 +32,7 @@ export const SessionProvider = ({ children }) => {
       setUser(result?.user || null)
     } catch (err) {
       console.error("Error cargando usuario:", err)
-      setUser(null)
-      setToken(null)
-      localStorage.removeItem("token")
+      logout()
     } finally {
       setLoading(false)
     }
