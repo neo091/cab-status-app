@@ -1,26 +1,27 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useReducer } from "react"
+import { abreviatedReducer } from "./AbreviatedReduce"
 
 const AbreviatedContext = createContext()
 
-export const AbreviatedProvider = ({ children }) => {
-  const [abreviated, setAbreviated] = useState(null)
+const ABREVIATED_TXT = "abreviated"
 
-  const toggleAbreviated = () => {
-    if (abreviated) {
-      setAbreviated(null)
-      localStorage.removeItem("abreviated")
-    } else {
-      localStorage.setItem("abreviated", true)
-      setAbreviated(true)
+export const AbreviatedProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(abreviatedReducer, undefined, () => {
+    const abreviatedLocal = localStorage.getItem(ABREVIATED_TXT)
+    return {
+      abreviated: abreviatedLocal || false,
     }
-  }
+  })
+
+  const toggleAbreviated = () => dispatch({ type: "TOGGLE_ABREVIATED" })
 
   useEffect(() => {
-    setAbreviated(localStorage.getItem("abreviated") || null)
-  }, [abreviated])
-
+    localStorage.setItem(ABREVIATED_TXT, state.abreviated)
+  }, [state.abreviated])
   return (
-    <AbreviatedContext.Provider value={{ abreviated, toggleAbreviated }}>
+    <AbreviatedContext.Provider
+      value={{ abreviated: state.abreviated, toggleAbreviated }}
+    >
       {children}
     </AbreviatedContext.Provider>
   )
