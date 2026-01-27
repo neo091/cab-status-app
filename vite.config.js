@@ -5,5 +5,5 @@ import tailwindcss from "@tailwindcss/vite"
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/taxi/", // <-- Esto es clave
+  // base: "/taxi/", // <-- Esto es clave
 })
