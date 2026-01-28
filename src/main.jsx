@@ -5,11 +5,11 @@ import App from "./App.jsx"
 import { AbreviatedProvider } from "./context/abreviated.jsx"
 import { StatusProvider } from "./context/Status.jsx"
 import { ConfigProvider } from "./context/Config.jsx"
-import { SessionProvider } from "./context/Session.context.jsx"
+import { AuthProvider } from "./context/auth/AuthProvider.jsx"
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <SessionProvider>
+    <AuthProvider>
       <StatusProvider>
         <ConfigProvider>
           <AbreviatedProvider>
@@ -17,6 +17,6 @@ createRoot(document.getElementById("root")).render(
           </AbreviatedProvider>
         </ConfigProvider>
       </StatusProvider>
-    </SessionProvider>
-  </StrictMode>
+    </AuthProvider>
+  </StrictMode>,
 )

@@ -1,11 +1,29 @@
-import { useState } from "react";
-import { useSessionContext } from "../context/Session.context";
-import Swal from "sweetalert2";
+import { useState } from "react"
+
+import Swal from "sweetalert2"
+import { useAuth } from "../context/auth/useAuth"
 
 export const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const { doLogin } = useSessionContext();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const { login } = useAuth()
+
+  const loginHandle = () => {
+    const newUsername = email.trim().toLocaleLowerCase()
+    const newPassword = password.trim().toLocaleLowerCase()
+
+    if (!newUsername && newUsername == "") {
+      console.log("username is empty")
+      return
+    }
+
+    if (!newUsername || !newPassword) {
+      Swal.fire("Cuidado!", "Usuario y contraseña son obligatorios")
+      return
+    }
+
+    login({ email: newUsername, password: newPassword })
+  }
 
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/80 flex justify-center items-center">
@@ -16,8 +34,8 @@ export const Login = () => {
           className="bg-gray-200 p-4 rounded block w-full text-black"
           name="username"
           type="text"
-          value={username.toLowerCase()}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email.toLowerCase()}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Usuario"
         />
 
@@ -33,31 +51,12 @@ export const Login = () => {
         <div>
           <button
             className="rounded p-4 bg-green-400 w-full"
-            onClick={() => {
-              const newUsername = username.trim().toLocaleLowerCase();
-              const newPassword = password.trim().toLocaleLowerCase();
-
-              if (!newUsername && newUsername == "") {
-                console.log("username is empty");
-                return;
-              }
-
-              if (!newUsername || !newPassword) {
-                Swal.fire("Cuidado!", "Usuario y contraseña son obligatorios");
-                return;
-              }
-
-              if (doLogin({ username: newUsername, password: newPassword })) {
-                console.log("Login correcto!");
-              } else {
-                console.log("Ocurrio un error");
-              }
-            }}
+            onClick={loginHandle}
           >
             Acceder
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

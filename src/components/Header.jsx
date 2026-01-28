@@ -2,12 +2,12 @@ import { Link } from "react-router-dom"
 import { useStatusContext } from "../context/Status"
 import Saludo from "./Saludo"
 import StatusText from "./StatusText"
-import { useSessionContext } from "../context/Session.context"
 import { IconChevronLeft, IconCog } from "../assets/Icons"
+import { useAuth } from "../context/auth/useAuth"
 
 const Header = ({ timer = "", backspace }) => {
   const { status } = useStatusContext()
-  const { user } = useSessionContext()
+  const { user } = useAuth()
 
   return (
     <header className="py-6 text-center text-gray-400">
@@ -19,7 +19,7 @@ const Header = ({ timer = "", backspace }) => {
           <IconChevronLeft />
         </Link>
       )}
-      <Saludo name={user?.username} />
+      <Saludo name={user?.first_name} />
       <StatusText status={status} />
 
       <section>

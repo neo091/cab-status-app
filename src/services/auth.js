@@ -1,4 +1,5 @@
 import axios from "axios"
+import { supabase } from "../lib/supabase"
 
 const apiUri =
   import.meta.env.VITE_API_URI_LOCAL ||
@@ -16,13 +17,28 @@ export const logoutAdmin = () => {
   localStorage.removeItem("adminToken")
 }
 
-export const login = async ({ username, password }) => {
-  const result = await axios.post(`${apiUri}/api/auth/login`, {
-    username,
+export const login = async ({ email, password }) => {
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  console.log(data)
+  return {}
+  // const result = await axios.post(`${apiUri}/api/auth/login`, {
+  //   username,
+  //   password,
+  // })
+
+  // return result.data
+}
+
+export const loginService = async ({ email, password }) => {
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
     password,
   })
 
-  return result.data
+  return data
 }
 
 export const getUser = async ({ token }) => {

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { loginAdmin } from "../services/auth"
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("")
@@ -19,7 +18,6 @@ export default function AdminLogin() {
       console.log(data)
 
       if (data.success) {
-        loginAdmin("fake_admin")
         navigate("/admin/dashboard")
       }
     } else {

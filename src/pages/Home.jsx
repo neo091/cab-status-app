@@ -10,15 +10,17 @@ import { useConfigContext } from "../context/Config"
 import { updateStatus } from "../services/status"
 import { addTrip } from "../services/trip.service"
 import { IconDelete } from "../assets/Icons"
+import { useAuth } from "../context/auth/useAuth"
 
 const Home = () => {
+  const token = null // borrar luego
   const { status, busyStatus, freeStatus, restStatus } = useStatusContext()
   const { abreviated } = useAbreviatedContext()
-  const { user, loading, token } = useSessionContext()
+  const { user, loading } = useAuth()
   const { telefono } = useConfigContext()
 
   const [startTime, setStartTime] = useState(
-    localStorage.getItem("startTime") || null
+    localStorage.getItem("startTime") || null,
   )
 
   const [duration, setDuration] = useState(null)
