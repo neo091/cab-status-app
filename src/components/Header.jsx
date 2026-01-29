@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom"
-import { useStatusContext } from "../context/Status"
 import Saludo from "./Saludo"
 import StatusText from "./StatusText"
 import { IconChevronLeft, IconCog } from "../assets/Icons"
 import { useAuth } from "../context/auth/useAuth"
+import { useStatus } from "../context/status/useStatus"
 
 const Header = ({ timer = "", backspace }) => {
-  const { status } = useStatusContext()
+  const { status } = useStatus()
   const { user } = useAuth()
 
   return (
-    <header className="py-6 text-center text-gray-400">
+    <header className="py-6 text-center text-gray-400 flex items-center ">
       {backspace && (
         <Link
           to={"/"}
@@ -19,18 +19,15 @@ const Header = ({ timer = "", backspace }) => {
           <IconChevronLeft />
         </Link>
       )}
-      <Saludo name={user?.first_name} />
-      <StatusText status={status} />
+      <div className="ms-6 flex-1">
+        <Saludo name={user?.first_name} />
+        <StatusText status={status} />
 
-      <section>
         <p>{timer}</p>
-      </section>
+      </div>
 
-      <Link
-        to={"/config"}
-        className="absolute top-2 right-2 bg-gray-800 p-3 rounded-full"
-      >
-        <IconCog />
+      <Link to={"/config"} className=" bg-gray-800 p-3 rounded-full me-4">
+        <IconCog size={6} />
       </Link>
     </header>
   )

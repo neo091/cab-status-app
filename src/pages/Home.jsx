@@ -2,19 +2,18 @@ import { useEffect, useState } from "react"
 import ToggleButton from "../components/ToggleButton"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
-import { useStatusContext } from "../context/Status"
 import { useAbreviatedContext } from "../context/abreviated"
-import { useSessionContext } from "../context/Session.context"
 import { Login } from "../components/Login"
 import { useConfigContext } from "../context/Config"
 import { updateStatus } from "../services/status"
 import { addTrip } from "../services/trip.service"
 import { IconDelete } from "../assets/Icons"
 import { useAuth } from "../context/auth/useAuth"
+import { useStatus } from "../context/status/useStatus"
 
 const Home = () => {
   const token = null // borrar luego
-  const { status, busyStatus, freeStatus, restStatus } = useStatusContext()
+  const { status, busyStatus, freeStatus, restStatus } = useStatus()
   const { abreviated } = useAbreviatedContext()
   const { user, loading } = useAuth()
   const { telefono } = useConfigContext()
@@ -208,7 +207,7 @@ const Home = () => {
         <Header timer={displayTime} />
 
         <section className="bg-gray-800 flex-1 flex items-center justify-center">
-          <ToggleButton iniciatViajeToggle={iniciatViajeToggle} />
+          <ToggleButton onPress={iniciatViajeToggle} />
         </section>
 
         <Footer descansar={descansar} />

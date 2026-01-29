@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 
 const StatusContext = createContext()
 
-export const StatusProvider = ({ children }) => {
+const StatusProvider = ({ children }) => {
   const [status, setStatus] = useState(null)
 
   const freeStatus = () => {
