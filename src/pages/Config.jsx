@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { useConfigContext } from "../context/Config"
 import { Link } from "react-router-dom"
+import { useConfig } from "../context/config/useConfig"
 
 const Config = () => {
-  const { telefono, setTelefono } = useConfigContext()
+  const { phone, updatePhone } = useConfig()
 
   const [editPhone, setEditPhone] = useState(false)
 
@@ -13,7 +13,6 @@ const Config = () => {
 
   const savePhoneHandler = () => {
     setEditPhone(false)
-    localStorage.setItem("telefono", telefono)
   }
 
   return (
@@ -27,8 +26,8 @@ const Config = () => {
             >
               <input
                 type="number"
-                onChange={(e) => setTelefono(e.target.value)}
-                value={telefono}
+                onChange={(e) => updatePhone({ phone: e.target.value })}
+                value={phone}
                 className="p-2 bg-gray-200 text-center text-2xl rounded"
               />
 
@@ -42,7 +41,7 @@ const Config = () => {
           </>
         ) : (
           <>
-            <p className="text-center text-white text-2xl w-full">{telefono}</p>
+            <p className="text-center text-white text-2xl w-full">{phone}</p>
             <button
               onClick={editHandler}
               className="px-6 py-2  bg-blue-600 text-white rounded"

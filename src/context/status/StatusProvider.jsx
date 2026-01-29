@@ -18,6 +18,8 @@ export const StatusProvider = ({ children }) => {
 
   const restStatus = () =>
     dispatch({ type: "CHANGE_STATUS", payload: "descansando" })
+  const payStatus = () =>
+    dispatch({ type: "CHANGE_STATUS", payload: "pagando" })
 
   useEffect(() => {
     localStorage.setItem("status", JSON.stringify({ status: state.status }))
@@ -25,7 +27,13 @@ export const StatusProvider = ({ children }) => {
 
   return (
     <StatusContext.Provider
-      value={{ status: state.status, freeStatus, busyStatus, restStatus }}
+      value={{
+        status: state.status,
+        freeStatus,
+        busyStatus,
+        restStatus,
+        payStatus,
+      }}
     >
       {children}
     </StatusContext.Provider>

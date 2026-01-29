@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
-import { Link } from "react-router-dom"
 import Swal from "sweetalert2"
 import { deleteTrip, getTrips } from "../services/trip.service"
-import { useSessionContext } from "../context/Session.context"
-import { IconChevronLeft, IconsTrash } from "../assets/Icons"
+import { IconsTrash } from "../assets/Icons"
 const History = () => {
   const [historyList, setHistoryList] = useState([])
   const [pagination, setPagination] = useState(null)
   const [page, setPage] = useState(1)
-  const { token } = useSessionContext()
+  const token = null
 
   const historyFetch = async (currentPage = 1) => {
     try {
@@ -18,7 +16,9 @@ const History = () => {
       setHistoryList(result.trips)
       setPagination(result.pagination)
       setPage(currentPage)
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   useEffect(() => {

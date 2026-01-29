@@ -4,8 +4,9 @@ import StatusText from "./StatusText"
 import { IconChevronLeft, IconCog } from "../assets/Icons"
 import { useAuth } from "../context/auth/useAuth"
 import { useStatus } from "../context/status/useStatus"
+import Counter from "./Counter"
 
-const Header = ({ timer = "", backspace }) => {
+const Header = ({ backspace }) => {
   const { status } = useStatus()
   const { user } = useAuth()
 
@@ -14,7 +15,7 @@ const Header = ({ timer = "", backspace }) => {
       {backspace && (
         <Link
           to={"/"}
-          className="absolute top-2 left-2 flex justify-center items-center font-bold text-2xl  rounded-full bg-gray-800 p-3"
+          className=" ms-4 flex justify-center items-center font-bold text-2xl rounded-full bg-gray-800 p-3"
         >
           <IconChevronLeft />
         </Link>
@@ -22,8 +23,7 @@ const Header = ({ timer = "", backspace }) => {
       <div className="ms-6 flex-1">
         <Saludo name={user?.first_name} />
         <StatusText status={status} />
-
-        <p>{timer}</p>
+        <Counter />
       </div>
 
       <Link to={"/config"} className=" bg-gray-800 p-3 rounded-full me-4">
