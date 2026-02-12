@@ -12,10 +12,10 @@ const History = () => {
 
   const historyFetch = async (currentPage = 1) => {
     try {
-      const result = await getTrips({ token, page: currentPage })
-      setHistoryList(result.trips)
-      setPagination(result.pagination)
-      setPage(currentPage)
+      // const result = await getTrips({ token, page: currentPage })
+      // setHistoryList(result.trips)
+      // setPagination(result.pagination)
+      // setPage(currentPage)
     } catch (error) {
       console.log(error)
     }

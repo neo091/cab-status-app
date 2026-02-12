@@ -10,7 +10,7 @@ export const Login = () => {
 
   const loginHandle = () => {
     const newUsername = email.trim().toLocaleLowerCase()
-    const newPassword = password.trim().toLocaleLowerCase()
+    const newPassword = password.trim()
 
     if (!newUsername && newUsername == "") {
       console.log("username is empty")
@@ -43,7 +43,7 @@ export const Login = () => {
           className="bg-gray-200 p-4 rounded block w-full text-black"
           name="password"
           type="password"
-          value={password.trim().toLowerCase()}
+          value={password.trim()}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Contraseña"
         />

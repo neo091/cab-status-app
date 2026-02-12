@@ -45,6 +45,8 @@ export const loginService = async ({ email, password }) => {
     }
   }
 
+  console.log(data)
+
   return data
 }
 
