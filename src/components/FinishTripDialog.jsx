@@ -1,0 +1,134 @@
+import { useState } from "react"
+import { IconDelete } from "../assets/Icons"
+import { getDuration } from "./Counter"
+import { useConfig } from "../context/config/useConfig"
+import { useStatus } from "../context/status/useStatus"
+
+function FinishTripDoalog() {
+  const { phone, abreviated } = useConfig()
+  const { status, freeStatus } = useStatus()
+  const [monto, setMonto] = useState("")
+  const [metodoPago, setMetodoPago] = useState("efectivo")
+  const [duration, _] = useState(() => {
+    const LOCAL_TIME_KEY = "startTime"
+    const saved = localStorage.getItem(LOCAL_TIME_KEY)
+    return saved ? getDuration(Number(saved)) : null
+  })
+
+  const guardarPago = () => {
+    const data = {
+      duration: duration,
+      amount: parseFloat(monto),
+      payMethod: metodoPago === "efectivo" ? "CASH" : "CARD",
+    }
+    console.log(data)
+    dissmiss()
+  }
+
+  const guardarPagoWhatsApp = () => {
+    if (monto.length === 0) return
+
+    const mensaje = abreviated
+      ? `${monto}${metodoPago == "tarjeta" ? "t" : "e"}`
+      : `✅ ${monto} € - ${metodoPago}`
+
+    const link = `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`
+
+    window.open(link, "_blank") // Abre WhatsApp
+
+    guardarPago()
+  }
+
+  const dissmiss = () => {
+    setMonto("")
+    setMetodoPago("efectivo")
+    freeStatus()
+  }
+  const setAmountHandle = (e) => setMonto(monto + e.target.innerText)
+  const deleteAmount = () => {
+    if (monto.length !== 0) {
+      const newTexto = monto.slice(0, monto.length - 1)
+      setMonto(newTexto)
+    }
+  }
+
+  return (
+    <div
+      className={`absolute top-0 left-0 fade-in right-0 bottom-0 bg-black/80 flex justify-center items-center ${status === "pagando" ? "" : " hidden "}`}
+    >
+      <div className="bg-white p-5 w-sm mx-4 rounded">
+        <h3 className="text-center text-2xl font-black mb-2">
+          Finalizar viaje
+        </h3>
+
+        <div className="w-full bg-gray-900 text-white flex items-center justify-center rounded-full h-12">
+          <p className="text-white font-bold font-mono">{monto}</p>
+        </div>
+
+        <div className="flex gap-2 mt-5 mb-5">
+          <button
+            onClick={() => setMetodoPago("efectivo")}
+            className={`rounded flex-1 p-3 ${
+              metodoPago === "efectivo"
+                ? "bg-green-500 text-green-900  font-black"
+                : "bg-gray-300"
+            }`}
+          >
+            <i className="fa-solid fa-money-bill-wave"></i> Efectivo
+          </button>
+          <button
+            onClick={() => setMetodoPago("tarjeta")}
+            className={`rounded flex-1 p-3 ${
+              metodoPago === "tarjeta"
+                ? "bg-green-500 text-green-900  font-black"
+                : "bg-gray-300"
+            }`}
+          >
+            <i className="fa-solid fa-credit-card"></i> Tarjeta
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 mb-2 gap-2">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n) => (
+            <button
+              key={n}
+              onClick={setAmountHandle}
+              className="bg-gray-700 text-white p-3 font-bold rounded-full"
+            >
+              {n}
+            </button>
+          ))}
+
+          <button
+            onClick={setAmountHandle}
+            className="bg-gray-700 text-white p-3 font-bold rounded-full"
+          >
+            .
+          </button>
+          <button
+            onClick={deleteAmount}
+            className="bg-gray-700 text-white p-3 font-bold rounded-full text-center flex items-center justify-center"
+          >
+            <IconDelete />
+          </button>
+        </div>
+
+        <div className="flex gap-2 justify-between">
+          <button onClick={dissmiss} className="rounded-full p-3 bg-red-400">
+            Cancelar
+          </button>
+
+          <button
+            disabled={monto.length === 0}
+            className="rounded-full p-3 bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={guardarPagoWhatsApp}
+          >
+            Enviar por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default FinishTripDoalog

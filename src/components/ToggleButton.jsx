@@ -1,7 +1,7 @@
-import { useStatusContext } from "../context/Status"
+import { useStatus } from "../context/status/useStatus"
 
-const ToggleButton = ({ iniciatViajeToggle }) => {
-  const { status } = useStatusContext()
+const ToggleButton = ({ onPress }) => {
+  const { status } = useStatus()
   return (
     <button
       className={`rounded-full  bg-gray-800 size-50 text-3xl uppercase shadow-md shadow-black
@@ -14,9 +14,8 @@ const ToggleButton = ({ iniciatViajeToggle }) => {
               status === "ocupado" &&
               "bg-red-600 text-red-950 border-2 border-red-900"
             }
-            
             `}
-      onClick={iniciatViajeToggle}
+      onClick={onPress}
     >
       {status !== "descansando"
         ? status === "libre"

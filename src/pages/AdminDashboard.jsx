@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 
-import { logoutAdmin } from "../services/auth"
 import { Link, useNavigate } from "react-router-dom"
 
 export default function AdminDashboard() {
@@ -50,7 +49,6 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = () => {
-    logoutAdmin()
     navigate("/")
   }
 

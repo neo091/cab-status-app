@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom"
-import { useAbreviatedContext } from "../context/abreviated"
+import { useAuth } from "../context/auth/useAuth"
+import { useConfig } from "../context/config/useConfig"
+import { useStatus } from "../context/status/useStatus"
 
-const Footer = ({ descansar }) => {
-  const { toggleAbreviated, abreviated } = useAbreviatedContext()
+const Footer = () => {
+  const { toggleAbreviated, abreviated } = useConfig()
+  const { logout } = useAuth()
+  const { restStatus } = useStatus()
 
   return (
     <footer className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-center gap-1 text-white justify-center items-center">
@@ -13,14 +17,11 @@ const Footer = ({ descansar }) => {
         Historial
       </Link>
       <button
-        onClick={descansar}
-        className="font-bold px-6 py-2 bg-gray-950 rounded cursor-pointer"
+        onClick={restStatus}
+        className="px-6 py-2 bg-gray-950 rounded cursor-pointer"
       >
         Descansar
       </button>
-      <Link to={"/admin/dashboard"} className="  px-6 py-2 bg-gray-950 rounded">
-        Admin
-      </Link>
       <button
         className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
         onClick={toggleAbreviated}
@@ -31,6 +32,12 @@ const Footer = ({ descansar }) => {
         ) : (
           <span className="text-red-500">No</span>
         )}
+      </button>
+      <button
+        className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
+        onClick={logout}
+      >
+        Logout
       </button>
     </footer>
   )

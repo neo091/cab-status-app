@@ -1,52 +1,52 @@
-import React, { useRef, useState } from "react"
-import { useConfigContext } from "../context/Config"
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useConfig } from "../context/config/useConfig"
 
 const Config = () => {
-  const { telefono, setTelefono } = useConfigContext()
+  const { phone, updatePhone } = useConfig()
 
-  const telefonoInputRef = useRef()
+  const [editPhone, setEditPhone] = useState(false)
 
-  const [cambiar, setCambiar] = useState(false)
-
-  const cambiarHande = () => {
-    setCambiar(true)
+  const editHandler = () => {
+    setEditPhone(true)
   }
 
-  const guardarHandle = () => {
-    setCambiar(false)
-    const newValue = telefonoInputRef.current.value
-    localStorage.setItem("telefono", newValue.toString())
-    setTelefono(newValue.toString())
+  const savePhoneHandler = () => {
+    setEditPhone(false)
   }
 
   return (
     <main className="bg-gray-900 min-h-dvh flex flex-col">
       <section className="bg-gray-800 flex-1 flex flex-col gap-5 items-center justify-center">
-        {cambiar ? (
+        {editPhone ? (
           <>
-            <input
-              ref={telefonoInputRef}
-              type="number"
-              defaultValue={telefono}
-              className="p-2 bg-gray-200 text-center text-2xl rounded"
-            />
-
-            <button
-              onClick={guardarHandle}
-              className="px-6 py-2  bg-blue-600 text-white rounded"
+            <form
+              onSubmit={savePhoneHandler}
+              className=" flex flex-col gap-5 items-center justify-center"
             >
-              Guardar
-            </button>
+              <input
+                type="number"
+                onChange={(e) => updatePhone({ phone: e.target.value })}
+                value={phone}
+                className="p-2 bg-gray-200 text-center text-2xl rounded"
+              />
+
+              <button
+                type="submit"
+                className="px-6 py-2  bg-blue-600 text-white rounded"
+              >
+                Guardar
+              </button>
+            </form>
           </>
         ) : (
           <>
-            <p className="text-center text-white text-2xl w-full">{telefono}</p>
+            <p className="text-center text-white text-2xl w-full">{phone}</p>
             <button
-              onClick={cambiarHande}
+              onClick={editHandler}
               className="px-6 py-2  bg-blue-600 text-white rounded"
             >
-              Cambiar
+              Editar
             </button>
           </>
         )}
