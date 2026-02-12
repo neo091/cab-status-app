@@ -10,7 +10,7 @@ import History from "./pages/History"
 
 function App() {
   return (
-    <Router basename="/taxi/">
+    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/config" element={<Config />} />

@@ -38,6 +38,13 @@ export const loginService = async ({ email, password }) => {
     password,
   })
 
+  if (error) {
+    console.log(error)
+    return {
+      error: true,
+    }
+  }
+
   return data
 }
 

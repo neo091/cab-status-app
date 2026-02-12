@@ -2,7 +2,6 @@ import { useEffect, useReducer } from "react"
 import { AuthContext } from "./AuthContext"
 import { authReducer } from "./AuthReducer"
 import { loginService } from "../../services/auth"
-import { useEffectEvent } from "react"
 
 // Estado inicial por defecto
 const initialState = {
@@ -19,10 +18,16 @@ export const AuthProvider = ({ children }) => {
   const login = async ({ email, password }) => {
     dispatch({ type: "INIT_LOGIN" })
     try {
-      const { user } = await loginService({ email, password })
+      const { user, error } = await loginService({ email, password })
+      if (error) {
+        dispatch({ type: "LOGOUT" })
+        return new Error("Error de login")
+      }
 
       dispatch({ type: "LOGIN_SUCCESS", payload: user.user_metadata })
-    } catch (error) {}
+    } catch (error) {
+      console.log("error:", error.message)
+    }
   }
   const logout = () => {
     dispatch({ type: "LOGOUT" })
