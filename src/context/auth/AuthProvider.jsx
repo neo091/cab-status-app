@@ -24,7 +24,12 @@ export const AuthProvider = ({ children }) => {
         return new Error("Error de login")
       }
 
-      dispatch({ type: "LOGIN_SUCCESS", payload: user.user_metadata })
+      const userData = {
+        id: user.id,
+        ...user.user_metadata,
+      }
+
+      dispatch({ type: "LOGIN_SUCCESS", payload: userData })
     } catch (error) {
       console.log("error:", error.message)
     }

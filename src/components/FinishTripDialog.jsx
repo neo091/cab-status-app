@@ -1,28 +1,42 @@
 import { useState } from "react"
 import { IconDelete } from "../assets/Icons"
-import { getDuration } from "./Counter"
 import { useConfig } from "../context/config/useConfig"
 import { useStatus } from "../context/status/useStatus"
+import { supabase } from "../lib/supabase"
+import { useAuth } from "../context/auth/useAuth"
 
 function FinishTripDoalog() {
   const { phone, abreviated } = useConfig()
   const { status, freeStatus } = useStatus()
   const [monto, setMonto] = useState("")
   const [metodoPago, setMetodoPago] = useState("efectivo")
-  const [duration, _] = useState(() => {
-    const LOCAL_TIME_KEY = "startTime"
-    const saved = localStorage.getItem(LOCAL_TIME_KEY)
-    return saved ? getDuration(Number(saved)) : null
-  })
+  const { user } = useAuth()
+
+  const saveData = async (dataSave) => {
+    const { data, error } = await supabase
+      .from("history")
+      .insert([dataSave])
+      .select()
+
+    if (error) return new Error(error.message)
+
+    return { data }
+  }
 
   const guardarPago = () => {
     const data = {
-      duration: duration,
-      amount: parseFloat(monto),
-      payMethod: metodoPago === "efectivo" ? "CASH" : "CARD",
+      user_id: user.id,
+      duration: localStorage.getItem("duration"),
+      amount: parseFloat(monto).toString(),
+      paymethod: metodoPago === "efectivo" ? "CASH" : "CARD",
     }
-    console.log(data)
-    dissmiss()
+    try {
+      saveData(data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      dissmiss()
+    }
   }
 
   const guardarPagoWhatsApp = () => {

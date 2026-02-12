@@ -33,6 +33,7 @@ function Counter() {
       }
     } else {
       if (startTime !== null) {
+        localStorage.setItem("duration", getDuration(startTime))
         setStartTime(null)
         localStorage.removeItem(LOCAL_TIME_KEY)
       }
