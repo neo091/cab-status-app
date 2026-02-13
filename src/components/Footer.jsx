@@ -24,17 +24,6 @@ const Footer = () => {
       </button>
       <button
         className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
-        onClick={toggleAbreviated}
-      >
-        Abreviado:{" "}
-        {abreviated ? (
-          <span className="text-green-500">Si</span>
-        ) : (
-          <span className="text-red-500">No</span>
-        )}
-      </button>
-      <button
-        className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
         onClick={logout}
       >
         Logout
