@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom" // Asumiendo que usas react-router
 import Swal from "sweetalert2"
 import { useAuth } from "../context/auth/useAuth"
+import PageTitle from "./PageTitle"
 
 export const Login = () => {
   const [email, setEmail] = useState("")
@@ -52,9 +53,7 @@ export const Login = () => {
       <div className="w-full max-w-md z-10">
         {/* Logo o Nombre de la App */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black text-white tracking-tighter">
-            TAXI<span className="text-green-500">FLOW</span>
-          </h1>
+          <PageTitle />
           <p className="text-gray-400 mt-2">Bienvenido de nuevo, compañero.</p>
         </div>
 

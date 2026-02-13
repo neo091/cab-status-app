@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { IconChart, IconClock, IconWhatsapp } from "../assets/Icons"
+import PageTitle from "./PageTitle"
 
 function HomeComponent() {
   return (
@@ -17,9 +18,7 @@ function HomeComponent() {
           Netto: Tu liquidación bajo control
         </div>
 
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent italic">
-          NETTO
-        </h1>
+        <PageTitle />
 
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
           Tu parte del turno, <br />{" "}
