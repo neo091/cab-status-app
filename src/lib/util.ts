@@ -1,0 +1,41 @@
+type Trip = {
+  created_at: string
+  amount: string
+}
+
+// Definimos la forma del objeto que usaremos para agrupar
+interface GroupedData {
+  [key: string]: { name: string; total: number; rawDate: Date }
+}
+
+export const prepareChartData = (list: Trip[]) => {
+  if (!list || list.length === 0) return []
+
+  const grouped = list.reduce((acc: GroupedData, trip) => {
+    const dateObj = new Date(trip.created_at)
+
+    // Usamos una clave que sea fácil de ordenar (YYYY-MM-DD)
+    const key = dateObj.toISOString().split("T")[0]
+
+    const label = dateObj.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+    })
+
+    if (!acc[key]) {
+      acc[key] = {
+        name: label,
+        total: 0,
+        rawDate: dateObj, // Guardamos la fecha real para ordenar bien al final
+      }
+    }
+
+    acc[key].total += parseFloat(trip.amount)
+    return acc
+  }, {})
+
+  // Convertimos a array y ordenamos cronológicamente (de más viejo a más nuevo para la gráfica)
+  return Object.values(grouped).sort(
+    (a, b) => a.rawDate.getTime() - b.rawDate.getTime(),
+  )
+}

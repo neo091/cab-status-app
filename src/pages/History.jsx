@@ -8,6 +8,7 @@ import ExportToCVSButton from "../components/ExportCVSButton"
 import HistoriList from "../components/HistoryList"
 import Paginador from "../components/Paginador"
 import SkeletonHistoryItem from "../components/SkeletonHistoryItem"
+import HistoryChart from "../components/HistoryChart"
 
 const ITEMS_PER_PAGE = 5
 
@@ -123,6 +124,11 @@ const History = () => {
         <Header backspace />
 
         <section className="flex-1 p-4 max-w-md mx-auto w-full">
+          {/* Solo mostramos la gráfica si hay datos y no está cargando */}
+          {!loading && historyList.length > 0 && (
+            <HistoryChart data={historyList} />
+          )}
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-white text-xl font-bold">Historial</h2>
             <ExportToCVSButton filter={filter} historyList={historyList} />
