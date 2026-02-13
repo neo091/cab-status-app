@@ -5,10 +5,12 @@ import Swal from "sweetalert2"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../context/auth/useAuth"
 import ExportToCVSButton from "../components/ExportCVSButton"
-import HistoriList from "../components/HistoryList"
 import Paginador from "../components/Paginador"
 import SkeletonHistoryItem from "../components/SkeletonHistoryItem"
 import HistoryChart from "../components/HistoryChart"
+import { useConfig } from "../context/config/useConfig"
+import HistoryList from "../components/HistoryList"
+import Layout from "../layouts/Layout"
 
 const ITEMS_PER_PAGE = 5
 
@@ -19,8 +21,19 @@ const History = () => {
   const [totalCount, setTotalCount] = useState(0)
   const [filter, setFilter] = useState("all") // "all", "today", "week", "month"
   const { user } = useAuth()
+  const { currency } = useConfig()
+  const [totalRecaudado, setTotalRecaudado] = useState(0) // Nuevo estado
 
-  // Función para obtener el rango de fechas según el filtro
+  const [stats, setStats] = useState({
+    totalBruto: 0,
+    totalTarjeta: 0,
+    totalEfectivo: 0,
+    gananciaNeta: 0, // El 40% del total
+    diferenciaEfectivo: 0, // Lo que te queda en mano tras liquidar
+  })
+
+  const [showSummary, setShowSummary] = useState(false)
+
   const getDateRange = (filterType) => {
     const now = new Date()
     let fromDate = new Date()
@@ -61,12 +74,50 @@ const History = () => {
         query = query.gte("created_at", dateLimit)
       }
 
-      const { data, error, count } = await query
+      let totalQuery = supabase
+        .from("history")
+        .select("amount, paymethod") // Solo pedimos la columna amount para que sea ligero
+        .eq("user_id", user.id)
 
-      if (error) throw error
-      // setTrips(data)
-      setHistoryList(data)
-      setTotalCount(count)
+      if (dateLimit) totalQuery = totalQuery.gte("created_at", dateLimit)
+
+      const [resList, resTotal] = await Promise.all([query, totalQuery])
+
+      if (resList.error) throw resList.error
+      if (resTotal.error) throw resTotal.error
+
+      // Seteamos la lista y el conteo
+      setHistoryList(resList.data)
+      setTotalCount(resList.count)
+
+      const data = resTotal.data
+
+      const bruto = data.reduce(
+        (acc, item) => acc + (parseFloat(item.amount) || 0),
+        0,
+      )
+      const tarjeta = data
+        .filter((i) => i.paymethod === "CARD")
+        .reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0)
+      const efectivo = data
+        .filter((i) => i.paymethod === "CASH")
+        .reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0)
+
+      // Tu 40% de todo lo trabajado
+      const netoQueTeCorresponde = (bruto * 40) / 100
+
+      // LA CLAVE:
+      // Si netoQueTeCorresponde (ej. 108€) es MAYOR que la tarjeta (ej. 240€),
+      // el resultado será NEGATIVO. Esto significa que la empresa TE DEBE dinero a ti.
+      const aCobrarOEntregar = netoQueTeCorresponde - tarjeta
+
+      setStats({
+        totalBruto: bruto,
+        totalTarjeta: tarjeta,
+        totalEfectivo: efectivo,
+        gananciaNeta: netoQueTeCorresponde,
+        diferenciaEfectivo: aCobrarOEntregar,
+      })
     } catch (error) {
       console.error("Error cargando historial:", error.message)
     } finally {
@@ -117,81 +168,190 @@ const History = () => {
   }
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+  // const totalRecaudado = historyList.reduce(
+  //   (acc, item) => acc + (parseFloat(item.amount) || 0),
+  //   0,
+  // )
 
   return (
     <>
-      <main className="bg-gray-900 min-h-screen flex flex-col">
-        <Header backspace />
+      <Layout>
+        <main className="bg-gray-900 min-h-screen flex flex-col">
+          <Header backspace />
 
-        <section className="flex-1 p-4 max-w-md mx-auto w-full">
-          {/* Solo mostramos la gráfica si hay datos y no está cargando */}
-          {!loading && historyList.length > 0 && (
-            <HistoryChart data={historyList} />
-          )}
-
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-white text-xl font-bold">Historial</h2>
-            <ExportToCVSButton filter={filter} historyList={historyList} />
-          </div>
-          <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-gray-900 no-scrollbar">
-            {[
-              { id: "all", label: "Todo" },
-              { id: "today", label: "Hoy" },
-              { id: "week", label: "Semana" },
-              { id: "month", label: "Mes" },
-            ].map((f) => (
-              <button
-                key={f.id}
-                onClick={() => {
-                  setPage(0)
-                  setFilter(f.id)
-                }}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-                  filter === f.id
-                    ? "bg-green-500 text-black shadow-lg shadow-green-500/20"
-                    : "bg-gray-800 text-gray-400 border border-gray-700"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-4">
-            {loading ? (
-              // Mostramos 5 esqueletos mientras carga
-              Array.from({ length: 5 }).map((_, i) => (
-                <SkeletonHistoryItem key={i} />
-              ))
-            ) : historyList.length === 0 ? (
-              <div className="text-center text-gray-400 py-10">
-                No tienes viajes
+          <section className="flex-1 p-4 max-w-md mx-auto w-full">
+            <button
+              onClick={() => setShowSummary(!showSummary)}
+              className="w-full mb-4 bg-gray-800 border border-gray-700 p-4 rounded-2xl flex justify-between items-center active:scale-95 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500/10 p-2 rounded-lg">💰</div>
+                <div className="text-left">
+                  <p className="text-[10px] text-gray-500 uppercase font-bold">
+                    Ganancia Hoy (40%)
+                  </p>
+                  <p className="text-xl font-black text-white">
+                    {stats.gananciaNeta.toFixed(2)}
+                    {currency}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <HistoriList
-                historyList={historyList}
-                handleDelete={handleDelete}
+              <span
+                className={`text-gray-500 transition-transform ${showSummary ? "rotate-180" : ""}`}
+              >
+                ▼
+              </span>
+            </button>
+
+            {showSummary && (
+              <div className="bg-gray-800/80 border border-gray-700 rounded-3xl p-6 mb-6 shadow-2xl">
+                {/* GANANCIA REAL (TU 40%) */}
+                <div className="text-center mb-6 pb-6 border-b border-gray-700/50">
+                  <p className="text-green-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">
+                    Tu Ganancia Neta (40%)
+                  </p>
+                  <p className="text-4xl font-black text-white">
+                    {stats.gananciaNeta.toFixed(2)}
+                    <span className="text-xl ml-1 text-green-500">
+                      {currency}
+                    </span>
+                  </p>
+                  <p className="text-[9px] text-gray-500 uppercase mt-1 tracking-widest">
+                    Sobre un bruto de {stats.totalBruto.toFixed(2)}
+                    {currency}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                  <div className="bg-gray-900/50 p-3 rounded-2xl border border-gray-700">
+                    <p className="text-gray-500 text-[10px] uppercase font-bold mb-1">
+                      En Tarjeta
+                    </p>
+                    <p className="font-bold text-blue-400">
+                      {stats.totalTarjeta.toFixed(2)}
+                      {currency}
+                    </p>
+                  </div>
+                  <div className="bg-gray-900/50 p-3 rounded-2xl border border-gray-700">
+                    <p className="text-gray-500 text-[10px] uppercase font-bold mb-1">
+                      En Efectivo
+                    </p>
+                    <p className="font-bold text-green-400">
+                      {stats.totalEfectivo.toFixed(2)}
+                      {currency}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900/50 p-3 rounded-2xl border border-gray-700 mb-6">
+                  <p className="text-gray-500 text-[10px] uppercase font-bold mb-1">
+                    En Total
+                  </p>
+                  <p className="font-bold text-blue-400">
+                    {(stats.totalTarjeta + stats.totalEfectivo).toFixed(2)}
+                    {currency}
+                  </p>
+                </div>
+
+                <div
+                  className={`p-4 rounded-2xl flex justify-between items-center ${
+                    stats.diferenciaEfectivo < 0
+                      ? "bg-blue-500/10 border border-blue-500/20"
+                      : "bg-green-500/10 border border-green-500/20"
+                  }`}
+                >
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400">
+                      {stats.diferenciaEfectivo < 0
+                        ? "La empresa te debe abonar:"
+                        : "Te corresponde del efectivo:"}
+                    </p>
+                    <p
+                      className={`text-xl font-black ${
+                        stats.diferenciaEfectivo < 0
+                          ? "text-blue-400"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {Math.abs(stats.diferenciaEfectivo).toFixed(2)} {currency}
+                    </p>
+                  </div>
+                  <div className="text-2xl">
+                    {stats.diferenciaEfectivo < 0 ? "🏦" : "💰"}
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-center text-gray-500 mt-4 italic">
+                  {stats.diferenciaEfectivo < 0
+                    ? `Quédate con los ${stats.totalEfectivo.toFixed(2)}${currency} del bolsillo. La empresa te debe el resto.`
+                    : `De los ${stats.totalEfectivo.toFixed(2)}${currency} en mano, aparta ${stats.diferenciaEfectivo.toFixed(2)}${currency} para ti.`}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-white text-xl font-bold">Historial</h2>
+              <ExportToCVSButton filter={filter} historyList={historyList} />
+            </div>
+            <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-gray-900 no-scrollbar">
+              {[
+                { id: "all", label: "Todo" },
+                { id: "today", label: "Hoy" },
+                { id: "week", label: "Semana" },
+                { id: "month", label: "Mes" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => {
+                    setPage(0)
+                    setFilter(f.id)
+                  }}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                    filter === f.id
+                      ? "bg-green-500 text-black shadow-lg shadow-green-500/20"
+                      : "bg-gray-800 text-gray-400 border border-gray-700"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4 min-h-[400px]">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonHistoryItem key={i} />
+                ))
+              ) : historyList.length === 0 ? (
+                <div className="text-center text-gray-500 py-20 bg-gray-800/20 rounded-3xl border border-dashed border-gray-700">
+                  <p>No hay viajes registrados</p>
+                </div>
+              ) : (
+                <HistoryList
+                  historyList={historyList}
+                  handleDelete={handleDelete}
+                  currency={currency}
+                />
+              )}
+            </div>
+
+            {/* Paginador Mejorado */}
+            {!loading && totalCount > ITEMS_PER_PAGE && (
+              <Paginador
+                page={page}
+                totalPages={totalPages}
+                prevPage={() => {
+                  setPage((p) => p - 1)
+                }}
+                nextPage={() => {
+                  setPage((p) => p + 1)
+                }}
               />
             )}
-          </div>
+          </section>
 
-          {/* Paginador Mejorado */}
-          {!loading && totalCount > ITEMS_PER_PAGE && (
-            <Paginador
-              page={page}
-              totalPages={totalPages}
-              prevPage={() => {
-                setPage((p) => p - 1)
-              }}
-              nextPage={() => {
-                setPage((p) => p + 1)
-              }}
-            />
-          )}
-        </section>
-
-        <Footer />
-      </main>
+          <Footer />
+        </main>
+      </Layout>
     </>
   )
 }
