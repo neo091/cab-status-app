@@ -10,6 +10,11 @@ export const configReducer = (state, action) => {
         ...state,
         abreviated: !state.abreviated,
       }
+    case "TOGGLE_WHATSAPP_REPORT":
+      return {
+        ...state,
+        whatsAppReport: !state.whatsAppReport,
+      }
     default:
       return state
   }

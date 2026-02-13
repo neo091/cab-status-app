@@ -7,6 +7,7 @@ const LOCAL_CONFIG = "local_config"
 const initialState = {
   phone: "604994352",
   abreviated: true,
+  whatsAppReport: false,
 }
 
 export const ConfigProvider = ({ children }) => {
@@ -16,6 +17,8 @@ export const ConfigProvider = ({ children }) => {
   })
 
   const toggleAbreviated = () => dispatch({ type: "TOGGLE_ABREVIATED" })
+  const togglewhatsAppReport = () =>
+    dispatch({ type: "TOGGLE_WHATSAPP_REPORT" })
   const updatePhone = ({ phone }) =>
     dispatch({ type: "UPDATE_PHONE", payload: phone })
 
@@ -28,8 +31,10 @@ export const ConfigProvider = ({ children }) => {
       value={{
         phone: state.phone,
         abreviated: state.abreviated,
+        whatsAppReport: state.whatsAppReport,
         toggleAbreviated,
         updatePhone,
+        togglewhatsAppReport,
       }}
     >
       {children}
