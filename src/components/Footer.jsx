@@ -1,33 +1,54 @@
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/auth/useAuth"
-import { useConfig } from "../context/config/useConfig"
 import { useStatus } from "../context/status/useStatus"
+import { IconChart, IconClock } from "../assets/Icons" // Asegúrate de tener iconos de historial y pausa
 
 const Footer = () => {
-  const { toggleAbreviated, abreviated } = useConfig()
   const { logout } = useAuth()
-  const { restStatus } = useStatus()
+  const { restStatus, status } = useStatus()
 
   return (
-    <footer className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-center gap-1 text-white justify-center items-center">
-      <Link
-        to={"/history"}
-        className="px-6 py-2 bg-gray-950 rounded cursor-pointer "
-      >
-        Historial
-      </Link>
-      <button
-        onClick={restStatus}
-        className="px-6 py-2 bg-gray-950 rounded cursor-pointer"
-      >
-        Descansar
-      </button>
-      <button
-        className="inline-block px-6 py-2 bg-gray-950 rounded cursor-pointer"
-        onClick={logout}
-      >
-        Logout
-      </button>
+    <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 pb-6 pt-3 px-4 shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
+      <div className="max-w-md mx-auto grid grid-cols-3 gap-2">
+        {/* BOTÓN HISTORIAL */}
+        <Link
+          to="/history"
+          className="flex flex-col items-center justify-center gap-1 py-2 rounded-2xl hover:bg-gray-800 active:scale-90 transition-all text-gray-400"
+        >
+          <span className="text-xl">📊</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">
+            Historial
+          </span>
+        </Link>
+
+        {/* BOTÓN DESCANSAR (DINÁMICO) */}
+        <button
+          onClick={restStatus}
+          className={`flex flex-col items-center justify-center gap-1 py-2 rounded-2xl active:scale-90 transition-all ${
+            status === "descansando"
+              ? "text-yellow-500 bg-yellow-500/10 border border-yellow-500/20"
+              : "text-gray-400 hover:bg-gray-800"
+          }`}
+        >
+          <span className="text-xl">
+            {status === "descansando" ? "⚡" : "☕"}
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-widest">
+            {status === "descansando" ? "Activar" : "Pausa"}
+          </span>
+        </button>
+
+        {/* BOTÓN LOGOUT */}
+        <button
+          onClick={logout}
+          className="flex flex-col items-center justify-center gap-1 py-2 rounded-2xl hover:bg-red-500/10 group transition-all text-gray-400"
+        >
+          <span className="text-xl group-hover:filter-none">🚪</span>
+          <span className="text-[10px] font-black uppercase tracking-widest group-hover:text-red-500">
+            Salir
+          </span>
+        </button>
+      </div>
     </footer>
   )
 }

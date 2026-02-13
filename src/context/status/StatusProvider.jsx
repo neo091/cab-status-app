@@ -16,8 +16,15 @@ export const StatusProvider = ({ children }) => {
   const busyStatus = () =>
     dispatch({ type: "CHANGE_STATUS", payload: "ocupado" })
 
-  const restStatus = () =>
-    dispatch({ type: "CHANGE_STATUS", payload: "descansando" })
+  const restStatus = () => {
+    // Si ya estoy descansando, al pulsar el botón me pongo en "libre"
+    if (state.status === "descansando") {
+      dispatch({ type: "CHANGE_STATUS", payload: "libre" })
+    } else {
+      // Si estoy en cualquier otro estado, me pongo a descansar
+      dispatch({ type: "CHANGE_STATUS", payload: "descansando" })
+    }
+  }
   const payStatus = () =>
     dispatch({ type: "CHANGE_STATUS", payload: "pagando" })
 
