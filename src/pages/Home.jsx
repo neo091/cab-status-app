@@ -2,6 +2,7 @@ import CenterBoton from "../components/CenterBotton"
 import FinishTripDoalog from "../components/FinishTripDialog"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
+import HomeComponent from "../components/Home"
 import Loader from "../components/Loader"
 import { Login } from "../components/Login"
 import { useAuth } from "../context/auth/useAuth"
@@ -12,7 +13,7 @@ const Home = () => {
 
   if (loading) return <Loader />
 
-  if (!user) return <Login />
+  if (!user) return <HomeComponent />
 
   return (
     <Layout>
