@@ -8,6 +8,7 @@ const initialState = {
   phone: "604994352",
   abreviated: true,
   whatsAppReport: false,
+  currency: "€",
 }
 
 export const ConfigProvider = ({ children }) => {
@@ -15,7 +16,8 @@ export const ConfigProvider = ({ children }) => {
     const localData = JSON.parse(localStorage.getItem(LOCAL_CONFIG))
     return localData ? localData : initialState
   })
-
+  const setCurrency = (symbol) =>
+    dispatch({ type: "SET_CURRENCY", payload: symbol })
   const toggleAbreviated = () => dispatch({ type: "TOGGLE_ABREVIATED" })
   const togglewhatsAppReport = () =>
     dispatch({ type: "TOGGLE_WHATSAPP_REPORT" })
@@ -32,6 +34,8 @@ export const ConfigProvider = ({ children }) => {
         phone: state.phone,
         abreviated: state.abreviated,
         whatsAppReport: state.whatsAppReport,
+        currency: state.currency,
+        setCurrency,
         toggleAbreviated,
         updatePhone,
         togglewhatsAppReport,

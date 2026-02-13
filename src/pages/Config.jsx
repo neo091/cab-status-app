@@ -17,9 +17,12 @@ const Config = () => {
     togglewhatsAppReport,
     toggleAbreviated,
     abreviated,
+    currency,
+    setCurrency,
   } = useConfig()
   const { logout } = useAuth()
   const [editPhone, setEditPhone] = useState(false)
+  const currencies = ["€", "$", "£", "S/.", "MXN"]
 
   const savePhoneHandler = (e) => {
     e.preventDefault()
@@ -38,6 +41,36 @@ const Config = () => {
       </div>
 
       <div className="max-w-md mx-auto flex flex-col gap-6">
+        <section className="bg-gray-800/50 border border-gray-700 rounded-3xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-yellow-500 font-bold text-xl w-6 text-center">
+              {currency}
+            </div>
+            <div>
+              <span className="font-bold block">Moneda local</span>
+              <p className="text-[10px] text-gray-500 uppercase">
+                Símbolo para cobros y reportes
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-between bg-gray-900/50 p-2 rounded-2xl border border-gray-700">
+            {currencies.map((symbol) => (
+              <button
+                key={symbol}
+                onClick={() => setCurrency(symbol)}
+                className={`flex-1 py-2 rounded-xl transition-all font-bold ${
+                  currency === symbol
+                    ? "bg-gray-700 text-white shadow-lg"
+                    : "text-gray-500"
+                }`}
+              >
+                {symbol}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* SECCIÓN WHATSAPP */}
         <section className="bg-gray-800/50 border border-gray-700 rounded-3xl p-6 shadow-xl">
           <div className="flex items-center justify-between mb-6">
@@ -62,44 +95,6 @@ const Config = () => {
               />
             </button>
           </div>
-
-          {/* {whatsAppReport && (
-            <div className="pt-4 border-t border-gray-700/50">
-              {editPhone ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    setEditPhone(false)
-                  }}
-                  className="flex gap-2"
-                >
-                  <input
-                    type="tel"
-                    autoFocus
-                    onChange={(e) => updatePhone({ phone: e.target.value })}
-                    value={phone}
-                    className="flex-1 p-3 bg-gray-900 border border-green-500/30 rounded-xl text-center font-mono"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-green-500 text-black px-4 rounded-xl font-bold"
-                  >
-                    OK
-                  </button>
-                </form>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <p className="text-xl font-mono text-gray-300">{phone}</p>
-                  <button
-                    onClick={() => setEditPhone(true)}
-                    className="text-green-500 text-sm font-bold"
-                  >
-                    Editar
-                  </button>
-                </div>
-              )}
-            </div>
-          )} */}
 
           {whatsAppReport && (
             <>
@@ -140,8 +135,6 @@ const Config = () => {
           )}
         </section>
 
-        {/* SECCIÓN: PREFERENCIAS VISUALES */}
-
         {whatsAppReport && (
           <section className="bg-gray-800/50 border border-gray-700 rounded-3xl p-6">
             <div className="flex items-center justify-between">
@@ -162,6 +155,16 @@ const Config = () => {
                   className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${abreviated ? "left-7" : "left-1"}`}
                 />
               </button>
+            </div>
+
+            {/* VISTA PREVIA DINÁMICA */}
+            <div className="mt-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50">
+              <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">
+                Ejemplo de envío:
+              </p>
+              <p className="text-sm font-mono text-blue-400">
+                {abreviated ? "15.00e" : `✅ 15.00 ${currency} - efectivo`}
+              </p>
             </div>
           </section>
         )}

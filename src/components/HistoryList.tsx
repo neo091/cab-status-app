@@ -1,4 +1,5 @@
 import { IconsTrash } from "../assets/Icons"
+import { useConfig } from "../context/config/useConfig"
 
 type HistoryItem = {
   created_at: string
@@ -14,6 +15,7 @@ interface HistoriListProps {
 }
 
 function HistoriList({ historyList, handleDelete }: HistoriListProps) {
+  const { currency } = useConfig()
   return historyList.map((h: HistoryItem) => (
     <div
       key={h.id}
@@ -22,7 +24,8 @@ function HistoriList({ historyList, handleDelete }: HistoriListProps) {
       <div className="flex-1 p-4">
         <div className="flex justify-between items-start">
           <p className="text-2xl font-black text-white">
-            {h.amount} <span className="text-green-400 text-lg">€</span>
+            {h.amount}{" "}
+            <span className="text-green-400 text-lg">{currency}</span>
           </p>
           <span
             className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${h.paymethod === "CASH" ? "bg-green-500/10 text-green-500" : "bg-blue-500/10 text-blue-500"}`}

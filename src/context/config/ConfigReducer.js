@@ -15,6 +15,11 @@ export const configReducer = (state, action) => {
         ...state,
         whatsAppReport: !state.whatsAppReport,
       }
+    case "SET_CURRENCY":
+      return {
+        ...state,
+        currency: action.payload,
+      }
     default:
       return state
   }
