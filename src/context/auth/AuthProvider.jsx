@@ -17,11 +17,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ email, password }) => {
     dispatch({ type: "INIT_LOGIN" })
+
     try {
       const { user, error } = await loginService({ email, password })
+
       if (error) {
         dispatch({ type: "LOGOUT" })
-        return new Error("Error de login")
+        // LANZAMOS el error para que el componente lo reciba
+        throw new Error(error.message || "Credenciales incorrectas")
       }
 
       const userData = {
@@ -30,10 +33,16 @@ export const AuthProvider = ({ children }) => {
       }
 
       dispatch({ type: "LOGIN_SUCCESS", payload: userData })
+
+      // Devolvemos los datos para confirmar éxito al componente
+      return userData
     } catch (error) {
-      console.log("error:", error.message)
+      console.error("error en context:", error.message)
+      // RE-LANZAMOS el error hacia el componente
+      throw error
     }
   }
+
   const logout = () => {
     dispatch({ type: "LOGOUT" })
     localStorage.removeItem("auth_session")
