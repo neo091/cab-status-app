@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import Swal from "sweetalert2"
-import { supabase } from "../lib/supabase"
 import { useAuth } from "../context/auth/useAuth"
 import ExportToCVSButton from "../components/ExportCVSButton"
 import Paginador from "../components/Paginador"
@@ -11,6 +10,7 @@ import { useConfig } from "../context/config/useConfig"
 import HistoryList from "../components/HistoryList"
 import Layout from "../layouts/Layout"
 import { getDateRange } from "../lib/util"
+import { deleteHistoryRecord, fetchHistoryData } from "../lib/api"
 
 const ITEMS_PER_PAGE = 5
 
@@ -27,97 +27,37 @@ const History = () => {
     totalBruto: 0,
     totalTarjeta: 0,
     totalEfectivo: 0,
-    gananciaNeta: 0, // El 40% del total
-    diferenciaEfectivo: 0, // Lo que te queda en mano tras liquidar
+    gananciaNeta: 0,
+    diferenciaEfectivo: 0,
   })
 
   const [showSummary, setShowSummary] = useState(false)
 
-  const fetchHistory = async () => {
+  const loadHistory = async () => {
     setLoading(true)
     try {
-      const from = page * ITEMS_PER_PAGE
-      const to = from + ITEMS_PER_PAGE - 1
-
       const dateLimit = getDateRange(filter)
 
-      let query = supabase
-        .from("history")
-        .select("*", { count: "exact" })
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .range(from, to)
-
-      // Aplicar filtro de fecha si existe
-      if (dateLimit) {
-        query = query.gte("created_at", dateLimit)
-      }
-
-      let totalQuery = supabase
-        .from("history")
-        .select("amount, paymethod") // Solo pedimos la columna amount para que sea ligero
-        .eq("user_id", user.id)
-
-      if (dateLimit) totalQuery = totalQuery.gte("created_at", dateLimit)
-
-      const [resList, resTotal] = await Promise.all([query, totalQuery])
-
-      if (resList.error) throw resList.error
-      if (resTotal.error) throw resTotal.error
-
-      // Seteamos la lista y el conteo
-      setHistoryList(resList.data)
-      setTotalCount(resList.count)
-
-      const data = resTotal.data
-
-      const bruto = data.reduce(
-        (acc, item) => acc + (parseFloat(item.amount) || 0),
-        0,
+      const result = await fetchHistoryData(
+        user.id,
+        page,
+        ITEMS_PER_PAGE,
+        dateLimit,
       )
-      const tarjeta = data
-        .filter((i) => i.paymethod === "CARD")
-        .reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0)
-      const efectivo = data
-        .filter((i) => i.paymethod === "CASH")
-        .reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0)
 
-      // Tu 40% de todo lo trabajado
-      const netoQueTeCorresponde = (bruto * 40) / 100
-
-      const aCobrarOEntregar = netoQueTeCorresponde - efectivo
-
-      setStats({
-        totalBruto: bruto,
-        totalTarjeta: tarjeta,
-        totalEfectivo: efectivo,
-        gananciaNeta: netoQueTeCorresponde,
-        diferenciaEfectivo: aCobrarOEntregar,
-      })
+      setHistoryList(result.history)
+      setTotalCount(result.count)
+      setStats(result.stats)
     } catch (error) {
-      console.error("Error cargando historial:", error.message)
+      Swal.fire("Error", "No se pudo cargando historial", "error")
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchHistory()
+    loadHistory()
   }, [user.id, page, filter])
-
-  const deleteItem = async (id) => {
-    const { error } = await supabase
-      .from("history")
-      .delete()
-      .eq("id", id) // El ID del viaje específico
-      .eq("user_id", user.id) // El ID del dueño del viaje
-
-    if (error) {
-      console.error("No se pudo borrar:", error.message)
-      return
-    }
-    fetchHistory()
-  }
 
   const handleDelete = (tripId) => {
     Swal.fire({
@@ -125,29 +65,30 @@ const History = () => {
       text: "Esta acción no se puede deshacer",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#ef4444", // Rojo
-      cancelButtonColor: "#374151", // Gris oscuro
+      confirmButtonColor: "#10b981",
+      cancelButtonColor: "#374151",
       confirmButtonText: "Sí, borrar",
       cancelButtonText: "Cancelar",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        deleteItem(tripId)
+        try {
+          await deleteHistoryRecord(tripId, user.id)
+          loadHistory()
 
-        Swal.fire({
-          title: "Borrado",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        })
+          Swal.fire({
+            title: "Borrado",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          })
+        } catch (error) {
+          Swal.fire("Error", "No se pudo eliminar el registro", "error")
+        }
       }
     })
   }
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
-  // const totalRecaudado = historyList.reduce(
-  //   (acc, item) => acc + (parseFloat(item.amount) || 0),
-  //   0,
-  // )
 
   return (
     <>
@@ -253,10 +194,12 @@ const History = () => {
                 </p>
               </div>
             )}
+
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white text-xl font-bold">Historial</h2>
               <ExportToCVSButton filter={filter} historyList={historyList} />
             </div>
+
             <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-gray-900 no-scrollbar">
               {[
                 { id: "today", label: "Hoy" },
