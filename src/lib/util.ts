@@ -59,3 +59,13 @@ export const getDateRange = (filterType: string) => {
   }
   return fromDate.toISOString()
 }
+export const calculateSettlement = (
+  amount: number,
+  paymethod: string,
+  percentage: number,
+) => {
+  const bruto = amount
+  const neto = (bruto * percentage) / 100
+  const efectivo = paymethod.toUpperCase() === "CASH" ? bruto : 0
+  return neto - efectivo
+}
