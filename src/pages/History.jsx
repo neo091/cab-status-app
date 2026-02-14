@@ -7,10 +7,10 @@ import { useAuth } from "../context/auth/useAuth"
 import ExportToCVSButton from "../components/ExportCVSButton"
 import Paginador from "../components/Paginador"
 import SkeletonHistoryItem from "../components/SkeletonHistoryItem"
-import HistoryChart from "../components/HistoryChart"
 import { useConfig } from "../context/config/useConfig"
 import HistoryList from "../components/HistoryList"
 import Layout from "../layouts/Layout"
+import { getDateRange } from "../lib/util"
 
 const ITEMS_PER_PAGE = 5
 
@@ -19,10 +19,9 @@ const History = () => {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
-  const [filter, setFilter] = useState("all") // "all", "today", "week", "month"
+  const [filter, setFilter] = useState("today") // "all", "today", "week", "month"
   const { user } = useAuth()
   const { currency } = useConfig()
-  const [totalRecaudado, setTotalRecaudado] = useState(0) // Nuevo estado
 
   const [stats, setStats] = useState({
     totalBruto: 0,
@@ -33,26 +32,6 @@ const History = () => {
   })
 
   const [showSummary, setShowSummary] = useState(false)
-
-  const getDateRange = (filterType) => {
-    const now = new Date()
-    let fromDate = new Date()
-
-    if (filterType === "today") {
-      fromDate.setHours(0, 0, 0, 0)
-    } else if (filterType === "week") {
-      const day = now.getDay() // 0 es domingo
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Lunes
-      fromDate = new Date(now.setDate(diff))
-      fromDate.setHours(0, 0, 0, 0)
-    } else if (filterType === "month") {
-      fromDate = new Date(now.getFullYear(), now.getMonth(), 1)
-      fromDate.setHours(0, 0, 0, 0)
-    } else {
-      return null // Para "all"
-    }
-    return fromDate.toISOString()
-  }
 
   const fetchHistory = async () => {
     setLoading(true)
@@ -106,10 +85,7 @@ const History = () => {
       // Tu 40% de todo lo trabajado
       const netoQueTeCorresponde = (bruto * 40) / 100
 
-      // LA CLAVE:
-      // Si netoQueTeCorresponde (ej. 108€) es MAYOR que la tarjeta (ej. 240€),
-      // el resultado será NEGATIVO. Esto significa que la empresa TE DEBE dinero a ti.
-      const aCobrarOEntregar = netoQueTeCorresponde - tarjeta
+      const aCobrarOEntregar = netoQueTeCorresponde - efectivo
 
       setStats({
         totalBruto: bruto,
@@ -242,49 +218,38 @@ const History = () => {
                     </p>
                   </div>
                 </div>
-
-                <div className="bg-gray-900/50 p-3 rounded-2xl border border-gray-700 mb-6">
-                  <p className="text-gray-500 text-[10px] uppercase font-bold mb-1">
-                    En Total
-                  </p>
-                  <p className="font-bold text-blue-400">
-                    {(stats.totalTarjeta + stats.totalEfectivo).toFixed(2)}
-                    {currency}
-                  </p>
-                </div>
-
                 <div
                   className={`p-4 rounded-2xl flex justify-between items-center ${
-                    stats.diferenciaEfectivo < 0
-                      ? "bg-blue-500/10 border border-blue-500/20"
-                      : "bg-green-500/10 border border-green-500/20"
+                    stats.diferenciaEfectivo >= 0
+                      ? "bg-green-500/10 border border-green-500/20" // Caso: Te falta cobrar
+                      : "bg-red-500/10 border border-red-500/20" // Caso: Debes entregar
                   }`}
                 >
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400">
-                      {stats.diferenciaEfectivo < 0
+                      {stats.diferenciaEfectivo >= 0
                         ? "La empresa te debe abonar:"
-                        : "Te corresponde del efectivo:"}
+                        : "Debes entregar a la empresa:"}
                     </p>
                     <p
                       className={`text-xl font-black ${
-                        stats.diferenciaEfectivo < 0
-                          ? "text-blue-400"
-                          : "text-green-500"
+                        stats.diferenciaEfectivo >= 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {Math.abs(stats.diferenciaEfectivo).toFixed(2)} {currency}
                     </p>
                   </div>
                   <div className="text-2xl">
-                    {stats.diferenciaEfectivo < 0 ? "🏦" : "💰"}
+                    {stats.diferenciaEfectivo >= 0 ? "💰" : "📉"}
                   </div>
                 </div>
 
-                <p className="text-[10px] text-center text-gray-500 mt-4 italic">
-                  {stats.diferenciaEfectivo < 0
-                    ? `Quédate con los ${stats.totalEfectivo.toFixed(2)}${currency} del bolsillo. La empresa te debe el resto.`
-                    : `De los ${stats.totalEfectivo.toFixed(2)}${currency} en mano, aparta ${stats.diferenciaEfectivo.toFixed(2)}${currency} para ti.`}
+                <p className="text-[10px] text-center text-gray-500 mt-4 italic px-2">
+                  {stats.diferenciaEfectivo >= 0
+                    ? `Quédate con todo tu efectivo (${stats.totalEfectivo.toFixed(2)}${currency}) y reclama la diferencia.`
+                    : `De tus ${stats.totalEfectivo.toFixed(2)}${currency} en efectivo, quédate con tu parte y entrega el sobrante.`}
                 </p>
               </div>
             )}
@@ -294,10 +259,10 @@ const History = () => {
             </div>
             <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-gray-900 no-scrollbar">
               {[
-                { id: "all", label: "Todo" },
                 { id: "today", label: "Hoy" },
                 { id: "week", label: "Semana" },
                 { id: "month", label: "Mes" },
+                { id: "all", label: "Todo" },
               ].map((f) => (
                 <button
                   key={f.id}

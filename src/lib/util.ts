@@ -39,3 +39,23 @@ export const prepareChartData = (list: Trip[]) => {
     (a, b) => a.rawDate.getTime() - b.rawDate.getTime(),
   )
 }
+
+export const getDateRange = (filterType: string) => {
+  const now = new Date()
+  let fromDate = new Date()
+
+  if (filterType === "today") {
+    fromDate.setHours(0, 0, 0, 0)
+  } else if (filterType === "week") {
+    const day = now.getDay() // 0 es domingo
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Lunes
+    fromDate = new Date(now.setDate(diff))
+    fromDate.setHours(0, 0, 0, 0)
+  } else if (filterType === "month") {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    fromDate.setHours(0, 0, 0, 0)
+  } else {
+    return null // Para "all"
+  }
+  return fromDate.toISOString()
+}
