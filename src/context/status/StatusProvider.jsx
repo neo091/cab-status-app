@@ -21,8 +21,11 @@ export const StatusProvider = ({ children }) => {
     if (state.status === "descansando") {
       dispatch({ type: "CHANGE_STATUS", payload: "libre" })
     } else {
-      // Si estoy en cualquier otro estado, me pongo a descansar
-      dispatch({ type: "CHANGE_STATUS", payload: "descansando" })
+      // Si estoy en cualquier otro estado, me pongo a descansar ecepto si estoy ocupado, que no me deja descansar
+
+      if (state.status !== "ocupado") {
+        dispatch({ type: "CHANGE_STATUS", payload: "descansando" })
+      }
     }
   }
   const payStatus = () =>
