@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from "react"
 import { AuthContext } from "./AuthContext"
 import { authReducer } from "./AuthReducer"
-import { loginService } from "../../services/auth"
+import { loginService, logoutService } from "../../services/auth"
 
 // Estado inicial por defecto
 const initialState = {
@@ -43,9 +43,14 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const logout = () => {
-    dispatch({ type: "LOGOUT" })
-    localStorage.removeItem("auth_session")
+  const logout = async () => {
+    try {
+      dispatch({ type: "LOGOUT" })
+      await logoutService()
+      localStorage.removeItem("auth_session")
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   useEffect(() => {
